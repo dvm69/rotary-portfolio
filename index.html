@@ -1,186 +1,1146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
-  <meta
-    name="description"
-    content="Devam Vora — Creative Director, Entrepreneur, and Finance Student."
-  />
-  <title>Devam Vora — Creative Director / Finance</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devam Vora | Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@100;300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #2a0808;
+            --bg-light: #5a1818;
+            --text-accent: #9db2e1; /* Periwinkle blue from reference */
+            --text-main: #e8e0d5;
+            --text-muted: rgba(232, 224, 213, 0.6);
+            
+            /* Skeuomorphic Metal Variables */
+            --metal-spun: conic-gradient(from 0deg, 
+                #f5f5f5 0%, #a0a0a0 10%, #f5f5f5 20%, #707070 30%, 
+                #f5f5f5 40%, #c0c0c0 50%, #f5f5f5 60%, #808080 70%, 
+                #f5f5f5 80%, #a0a0a0 90%, #f5f5f5 100%);
+            --metal-edge: linear-gradient(145deg, #ffffff, #555555);
+            --metal-dark: linear-gradient(145deg, #333, #111);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: radial-gradient(circle at 50% 50%, var(--bg-light), var(--bg-dark));
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Subtle Noise Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top Navigation */
+        nav {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: lowercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links span {
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .nav-links span:hover {
+            color: var(--text-accent);
+        }
+
+        .nav-btn {
+            border: 1px solid var(--text-muted);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: transparent;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--text-main);
+            color: var(--bg-dark);
+        }
+
+        /* Background Giant Typography */
+        .giant-text {
+            position: absolute;
+            top: 26%; /* Intersects perfectly with the top edge of the dial */
+            left: 50%;
+            /* Base center transform + dynamic variables for mouse tracking */
+            transform: translate(calc(-50% + var(--move-x, 0px)), calc(-50% + var(--move-y, 0px)));
+            font-size: 15vw; /* Drastically increased size */
+            font-weight: 500;
+            color: var(--text-accent);
+            white-space: nowrap;
+            letter-spacing: -0.04em;
+            z-index: 1;
+            pointer-events: none;
+            opacity: 0.9;
+            text-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            transition: transform 0.15s ease-out; /* Smooth parallax glide */
+        }
+
+        /* Center Stage Layout */
+        .main-stage {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        .dial-wrapper {
+            position: relative;
+            width: 480px; /* Larger dial */
+            height: 480px;
+            perspective: 1000px;
+            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.6));
+        }
+
+        /* Base Plate */
+        .dial-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #111;
+            box-shadow: 
+                inset 0 0 20px rgba(0,0,0,1),
+                0 0 0 12px #222,
+                0 0 0 14px #444; /* Outer casing ring */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Images inside the base plate (under holes) */
+        .base-image-container {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background-size: cover;
+            background-position: center;
+            box-shadow: inset 0 5px 10px rgba(0,0,0,0.8);
+            border: 2px solid #000;
+            filter: grayscale(40%) contrast(1.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.8rem;
+        }
+
+        /* Rotating Glass/Metal Disc */
+        .dial-disc {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            touch-action: none;
+            cursor: grab;
+            transform-origin: 50% 50%;
+            z-index: 10;
+        }
+
+        .dial-disc:active {
+            cursor: grabbing;
+        }
+
+        /* SVG styling for the disc */
+        .disc-svg {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.5));
+        }
+
+        /* Huge Metallic Center Cap */
+        .dial-center-cap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 55%; /* Massive center like the reference */
+            height: 55%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: var(--metal-spun);
+            box-shadow: 
+                0 15px 25px rgba(0,0,0,0.6),
+                inset 0 2px 4px rgba(255,255,255,0.8),
+                inset 0 -5px 10px rgba(0,0,0,0.3),
+                0 0 0 4px #ccc, /* rim */
+                0 0 0 5px #555; /* outer rim shadow */
+            z-index: 40;
+            pointer-events: none;
+        }
+        
+        /* Subtle indentation in the very center of the cap */
+        .dial-center-cap::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15%;
+            height: 15%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: var(--metal-dark);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,1);
+        }
+
+        /* Metal Stopper */
+        .dial-stopper {
+            position: absolute;
+            width: 70px;
+            height: 24px;
+            background: var(--metal-edge);
+            border-radius: 12px;
+            box-shadow: 
+                0 15px 20px rgba(0,0,0,0.8),
+                inset 0 2px 5px rgba(255,255,255,0.9),
+                inset 0 -2px 5px rgba(0,0,0,0.6);
+            z-index: 30;
+            transform-origin: left center;
+        }
+        
+        /* Hit Targets */
+        .hit-target {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background: transparent;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .hit-target:hover::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 15px rgba(255,255,255,0.4);
+        }
+
+        /* Corner Elements */
+        .bottom-left {
+            position: absolute;
+            bottom: 3rem;
+            left: 4rem;
+            max-width: 250px;
+            z-index: 10;
+        }
+
+        .bottom-left p {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .bottom-right {
+            position: absolute;
+            bottom: 3rem;
+            right: 4rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .bottom-right svg {
+            width: 60px;
+            height: 60px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 1;
+        }
+
+        /* Content Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(42, 8, 8, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: rgba(20, 5, 5, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 4rem;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+            transform: translateY(40px) scale(0.98);
+            transition: transform 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            position: relative;
+            text-align: center;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--text-main);
+            color: var(--bg-dark);
+        }
+
+        .modal-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-accent);
+            text-transform: lowercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .modal-desc {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        
+        .sub-instruction {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            white-space: nowrap;
+        }
+
+        /* Page Content Scrollbar */
+        #page-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        #page-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        #page-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        /* Case Study Full-Page Sheet */
+        .cs-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100vw;
+            height: 96vh;
+            background: rgba(22, 6, 6, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 40px 40px 0 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            transform: translateY(100%);
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .cs-overlay.active {
+            transform: translateY(0);
+        }
+
+        .cs-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: flex-end;
+            background: linear-gradient(to bottom, rgba(22,6,6,1) 0%, rgba(22,6,6,0) 100%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .cs-close {
+            pointer-events: all;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-main);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .cs-close:hover {
+            background: var(--text-main);
+            color: var(--bg-dark);
+            transform: scale(1.05);
+        }
+
+        .cs-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 6rem 4rem 10rem 4rem;
+            scroll-behavior: smooth;
+        }
+
+        .cs-scroll-area::-webkit-scrollbar { width: 0px; } /* Clean look */
+
+        /* Case Study Layout Elements */
+        .cs-hero {
+            margin-bottom: 5rem;
+            max-width: 1200px;
+            margin-inline: auto;
+        }
+        
+        .cs-hero h1 {
+            font-size: 6vw;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .cs-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: var(--text-accent);
+            text-transform: lowercase;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .cs-image-full {
+            width: 100%;
+            height: 60vh;
+            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 6rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            max-width: 1200px;
+            margin-inline: auto;
+        }
+
+        .cs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            max-width: 1200px;
+            margin-inline: auto;
+            margin-bottom: 6rem;
+            align-items: center;
+        }
+
+        .cs-text h3 {
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .cs-text p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .cs-image-half {
+            width: 100%;
+            height: 500px;
+            border-radius: 20px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Scroll Animations Classes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(60px);
+            transition: all 1s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.15s; }
+
+        @media (max-width: 768px) {
+            .cs-overlay { height: 90vh; border-radius: 30px 30px 0 0; }
+            .cs-header { padding: 1.5rem; }
+            .cs-scroll-area { padding: 5rem 1.5rem 6rem 1.5rem; }
+            .cs-hero h1 { font-size: 3rem; }
+            .cs-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+            .cs-image-full { height: 40vh; margin-bottom: 4rem; }
+            .cs-image-half { height: 350px; }
+            .cs-grid { margin-bottom: 4rem; }
+        }
+    </style>
 </head>
-
 <body>
-  <div class="aurora" aria-hidden="true"></div>
-  <div class="noise" aria-hidden="true"></div>
 
-  <main class="site-shell">
-    <header class="hero glass-panel">
-      <div class="hero__copy">
-        <p class="eyebrow"><span class="status-dot"></span> Creative / Commerce / Capital</p>
-        <h1>Devam <span>Vora</span></h1>
-        <p class="hero__role">
-          Creative director, entrepreneur &amp; finance student building brands
-          where sharp visual systems meet quantitative thinking.
-        </p>
-      </div>
-
-      <div class="hero__meta" aria-label="Profile focus">
-        <div class="meta-card">
-          <span>01</span>
-          <strong>Brand Architecture</strong>
-          <small>Identity, campaigns, retail worlds</small>
+    <nav>
+        <div class="nav-links">
+            <span id="nav-about">about me</span>
+            <span id="nav-work">work</span>
+            <span id="nav-resume">resume</span>
         </div>
-        <div class="meta-card">
-          <span>02</span>
-          <strong>Corporate Finance</strong>
-          <small>Models, valuation, decision systems</small>
+        <button class="nav-btn" id="nav-contact">contact</button>
+    </nav>
+
+    <div class="giant-text">devam vora</div>
+
+    <main class="main-stage">
+        <div class="dial-wrapper" id="dial-wrapper">
+            <!-- Base plate where images sit -->
+            <div class="dial-base" id="dial-base">
+                <!-- Images injected via JS -->
+            </div>
+            
+            <!-- Metallic Stopper -->
+            <div class="dial-stopper" id="dial-stopper"></div>
+
+            <!-- Rotating Assembly (Glass/Metal Disc) -->
+            <div class="dial-disc" id="dial-disc">
+                <!-- SVG Disc injected via JS -->
+                <!-- Hit targets injected via JS -->
+            </div>
+            
+            <!-- Huge Metallic Center -->
+            <div class="dial-center-cap"></div>
+            
+            <div class="sub-instruction">table of contents — drag to dial</div>
         </div>
-        <div class="meta-card">
-          <span>03</span>
-          <strong>Visual Design</strong>
-          <small>Digital direction, motion, experience</small>
+    </main>
+
+    <div class="bottom-left">
+        <p>I am drawn to the fluid border between<br>
+        strategic logic and radical design,<br>
+        where corporate finance and creative<br>
+        architecture beautifully collide.</p>
+    </div>
+
+    <div class="bottom-right">
+        <div>
+            Mumbai, India<br>
+            <span style="color: var(--text-accent);">Creative Arch.</span>
         </div>
-      </div>
-    </header>
+        <!-- Architectural Isometric Shape -->
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 10 L90 30 L90 70 L50 90 L10 70 L10 30 Z" />
+            <path d="M50 10 L50 50 L90 30 M50 50 L10 30 M50 50 L50 90" />
+            <circle cx="50" cy="50" r="3" fill="var(--text-accent)"/>
+        </svg>
+    </div>
 
-    <section class="dial-stage" aria-labelledby="dial-heading">
-      <div class="section-intro">
-        <p class="eyebrow">Table of contents</p>
-        <h2 id="dial-heading">Dial a project.</h2>
-        <p>
-          Drag clockwise from <strong>START</strong> toward the stop, then release.
-          Each completed mechanical return reveals a different chapter.
-        </p>
-      </div>
+    <!-- Case Study Animated Sheet -->
+    <div class="cs-overlay" id="cs-overlay">
+        <div class="cs-header">
+            <button class="cs-close" id="cs-close">&times;</button>
+        </div>
+        <div class="cs-scroll-area" id="cs-content">
+            <!-- Rich HTML injected via JS -->
+        </div>
+    </div>
 
-      <div class="phone-wrap">
-        <div class="phone">
-          <div class="phone__top-grille" aria-hidden="true"></div>
-          <div class="phone__body">
-            <div class="phone__brand">VORA / 01</div>
-            <div class="dial-instruction">TURN • RELEASE</div>
+    <!-- Page Modal (For Resume, About, Contact) -->
+    <div class="modal-overlay" id="page-overlay">
+        <div class="modal-content" style="max-width: 700px; text-align: left;">
+            <button class="modal-close" id="page-close">&times;</button>
+            <h3 class="modal-title" id="page-title" style="margin-bottom: 2rem;">Title</h3>
+            <div id="page-content" class="modal-desc" style="max-height: 60vh; overflow-y: auto; padding-right: 15px;">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
 
-            <div
-              class="rotary"
-              id="rotaryDial"
-              role="application"
-              aria-label="Rotary project dial. Drag clockwise and release to choose a project."
-            >
-              <div class="rotary__shadow"></div>
-              <div class="rotary__face">
-                <div class="rotary__ring rotary__ring--outer"></div>
-                <div class="rotary__ring rotary__ring--inner"></div>
+    <script>
+        // --- PORTFOLIO DATA ---
+        const projectData = {
+            1: {
+                image: "https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=150&q=80",
+                html: `
+                    <div class="cs-hero reveal">
+                        <span class="cs-tag">brand architecture & maximalist design</span>
+                        <h1>Brawn Coffee</h1>
+                    </div>
+                    <div class="cs-image-full reveal reveal-delay-1" style="background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=1600&q=80')"></div>
+                    <div class="cs-grid">
+                        <div class="cs-text reveal">
+                            <h3>Maximalist Menus</h3>
+                            <p>Moving away from the sterile minimalism of modern coffee, Brawn embraces loud, structural design. The café menus act as interactive centerpieces meant to evoke emotion and conversation rather than just list ingredients.</p>
+                        </div>
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80')"></div>
+                    </div>
+                    <div class="cs-grid">
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1559525839-b184a4d698c7?auto=format&fit=crop&w=800&q=80')"></div>
+                        <div class="cs-text reveal">
+                            <h3>Unit Economics</h3>
+                            <p>Beyond aesthetics, the project required deep modeling of distributor margins and pop-up event profitability, specifically structuring the revenue streams for the 7 UP 7 dice game pop-up events.</p>
+                        </div>
+                    </div>
+                `
+            },
+            2: {
+                image: "https://images.unsplash.com/photo-1605651202774-7d573fd3f12d?auto=format&fit=crop&w=150&q=80",
+                html: `
+                    <div class="cs-hero reveal">
+                        <span class="cs-tag">digital architecture & shopify</span>
+                        <h1>Khushi Food Products</h1>
+                    </div>
+                    <div class="cs-image-full reveal reveal-delay-1" style="background-image: url('https://images.unsplash.com/photo-1605651202774-7d573fd3f12d?auto=format&fit=crop&w=1600&q=80')"></div>
+                    <div class="cs-grid">
+                        <div class="cs-text reveal">
+                            <h3>Web Architecture</h3>
+                            <p>A complete overhaul of the frontend using HTML, CSS, and Shopify liquid. Focused on fast load times and an intuitive purchasing funnel for fast-moving consumer goods.</p>
+                        </div>
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1590218774730-1c3905e92716?auto=format&fit=crop&w=800&q=80')"></div>
+                    </div>
+                    <div class="cs-grid">
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1563805042-7684c8a9e9cb?auto=format&fit=crop&w=800&q=80')"></div>
+                        <div class="cs-text reveal">
+                            <h3>JSON-LD & SEO</h3>
+                            <p>Implemented dynamic schema architecture for better indexing, paired with a highly localized marketing campaign featuring Gujarati-subtitled video content to target specific demographics.</p>
+                        </div>
+                    </div>
+                `
+            },
+            3: {
+                image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=150&q=80",
+                html: `
+                    <div class="cs-hero reveal">
+                        <span class="cs-tag">corporate finance & modeling</span>
+                        <h1>Quantitative Modeling</h1>
+                    </div>
+                    <div class="cs-image-full reveal reveal-delay-1" style="background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1600&q=80')"></div>
+                    <div class="cs-grid">
+                        <div class="cs-text reveal">
+                            <h3>Option Interactions</h3>
+                            <p>Rigorous academic models tracking Delta-Gamma interactions across volatile market conditions, calculating risk-adjusted returns and hedging strategies.</p>
+                        </div>
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80')"></div>
+                    </div>
+                    <div class="cs-grid">
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=800&q=80')"></div>
+                        <div class="cs-text reveal">
+                            <h3>WACC & Planning</h3>
+                            <p>Designed sophisticated retirement planning schedules and comprehensive Weighted Average Cost of Capital (WACC) valuation models for enterprise-level decision making.</p>
+                        </div>
+                    </div>
+                `
+            },
+            4: {
+                image: "https://images.unsplash.com/photo-1516280440502-62a265672326?auto=format&fit=crop&w=150&q=80",
+                html: `
+                    <div class="cs-hero reveal">
+                        <span class="cs-tag">creative direction & media</span>
+                        <h1>Audiovisual Direction</h1>
+                    </div>
+                    <div class="cs-image-full reveal reveal-delay-1" style="background-image: url('https://images.unsplash.com/photo-1516280440502-62a265672326?auto=format&fit=crop&w=1600&q=80')"></div>
+                    <div class="cs-grid">
+                        <div class="cs-text reveal">
+                            <h3>Cinematic Reels</h3>
+                            <p>Directing short-form reel content with a hyper-focused cinematic lens, turning standard event coverage into narrative-driven art for brands and artists.</p>
+                        </div>
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1470229722913-7c092bce52f3?auto=format&fit=crop&w=800&q=80')"></div>
+                    </div>
+                    <div class="cs-grid">
+                        <div class="cs-image-half reveal" style="background-image: url('https://images.unsplash.com/photo-1571266028243-cb40fce7573a?auto=format&fit=crop&w=800&q=80')"></div>
+                        <div class="cs-text reveal">
+                            <h3>Live DJ Mixing</h3>
+                            <p>Using Rekordbox to blend deep electronic rhythms with pop anthems, creating an immersive auditory landscape that pairs perfectly with the visual direction.</p>
+                        </div>
+                    </div>
+                `
+            }
+        };
 
-                <div class="rotary__number rotary__number--1">1</div>
-                <div class="rotary__number rotary__number--2">2</div>
-                <div class="rotary__number rotary__number--3">3</div>
-                <div class="rotary__number rotary__number--4">4</div>
+        // --- DIAL CONFIGURATION ---
+        // Dynamically measure size based on CSS to handle responsiveness
+        let dialWrapper = document.getElementById('dial-wrapper');
+        let DIAL_SIZE = dialWrapper.offsetWidth; 
+        let RADIUS = DIAL_SIZE / 2;
+        
+        // Scale elements relative to dial size
+        let HOLE_RADIUS = DIAL_SIZE * 0.075; // ~36px on 480px dial
+        let HOLE_DISTANCE = RADIUS * 0.72; // Distance from center to hole
+        
+        const STOPPER_ANGLE = 45; // Bottom right
+        const TOTAL_HOLES = 10;
+        
+        // Generate hole angles. Standard layout: hole 1 is near stopper, going counter-clockwise.
+        // We will map 1-4 to our projects. The rest are decorative.
+        // Let's space them 28 degrees apart.
+        const START_ANGLE = 0; 
+        const ANGLE_STEP = -28; 
+        
+        const HOLE_ANGLES = {};
+        for (let i = 1; i <= TOTAL_HOLES; i++) {
+            HOLE_ANGLES[i] = START_ANGLE + (i - 1) * ANGLE_STEP;
+        }
 
-                <div class="rotary__label">DIAL<br />FOR WORK</div>
+        const dialBase = document.getElementById('dial-base');
+        const dialDisc = document.getElementById('dial-disc');
+        const dialStopper = document.getElementById('dial-stopper');
 
-                <div class="rotary__finger-stop" aria-hidden="true">
-                  <span></span>
+        function initDial() {
+            // Recalculate sizes
+            DIAL_SIZE = dialWrapper.offsetWidth;
+            RADIUS = DIAL_SIZE / 2;
+            HOLE_RADIUS = DIAL_SIZE * 0.075;
+            HOLE_DISTANCE = RADIUS * 0.72;
+
+            // Position Stopper
+            dialStopper.style.top = '50%';
+            dialStopper.style.left = '50%';
+            dialStopper.style.marginTop = '-12px'; // Half height
+            dialStopper.style.transform = `rotate(${STOPPER_ANGLE}deg) translateX(${RADIUS * 0.78}px)`;
+
+            // Clear previous
+            dialBase.innerHTML = '';
+            dialDisc.innerHTML = '';
+
+            // 1. Create the Complex SVG Disc
+            dialDisc.innerHTML = createDiscSVG();
+
+            // 2. Populate Base Images and Disc Hit Targets
+            for (let i = 1; i <= TOTAL_HOLES; i++) {
+                const angleRad = HOLE_ANGLES[i] * (Math.PI / 180);
+                const nx = RADIUS + HOLE_DISTANCE * Math.cos(angleRad);
+                const ny = RADIUS + HOLE_DISTANCE * Math.sin(angleRad);
+
+                // Base Image Container
+                const imgCont = document.createElement('div');
+                imgCont.className = 'base-image-container';
+                imgCont.style.left = `${nx}px`;
+                imgCont.style.top = `${ny}px`;
+                imgCont.style.width = `${HOLE_RADIUS * 2}px`;
+                imgCont.style.height = `${HOLE_RADIUS * 2}px`;
+
+                // If it's a project, add the specific image
+                if (projectData[i]) {
+                    imgCont.style.backgroundImage = `url('${projectData[i].image}')`;
+                } else {
+                    // Decorative patterns/text for empty holes
+                    imgCont.innerText = "—"; 
+                    imgCont.style.background = "#1a1a1a";
+                }
+                dialBase.appendChild(imgCont);
+
+                // Hit Target on the rotating disc (All holes are now interactive)
+                const hitTarget = document.createElement('div');
+                hitTarget.className = 'hit-target';
+                hitTarget.style.left = `${nx}px`;
+                hitTarget.style.top = `${ny}px`;
+                hitTarget.style.width = `${HOLE_RADIUS * 2.2}px`; // slightly larger for touch
+                hitTarget.style.height = `${HOLE_RADIUS * 2.2}px`;
+                hitTarget.dataset.hole = i;
+                dialDisc.appendChild(hitTarget);
+            }
+            
+            attachDragEvents();
+        }
+
+        // Generate SVG Path for the glassy/metal disc with punched holes
+        function createDiscSVG() {
+            let svgStr = `<svg class="disc-svg" viewBox="0 0 ${DIAL_SIZE} ${DIAL_SIZE}" xmlns="http://www.w3.org/2000/svg">`;
+            svgStr += `
+                <defs>
+                    <linearGradient id="discGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+                        <stop offset="50%" stop-color="#888888" stop-opacity="0.1"/>
+                        <stop offset="100%" stop-color="#000000" stop-opacity="0.5"/>
+                    </linearGradient>
+                    <filter id="glassBevel">
+                        <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000" flood-opacity="0.5"/>
+                        <feComponentTransfer><feFuncA type="linear" slope="0.5"/></feComponentTransfer>
+                    </filter>
+                </defs>
+            `;
+            
+            // Outer circle path (Clockwise)
+            let path = `M ${RADIUS},${RADIUS} m -${RADIUS},0 a ${RADIUS},${RADIUS} 0 1,0 ${DIAL_SIZE},0 a ${RADIUS},${RADIUS} 0 1,0 -${DIAL_SIZE},0 `;
+            
+            // Inner holes (Counter-Clockwise to punch out using evenodd)
+            for (let i = 1; i <= TOTAL_HOLES; i++) {
+                const angleRad = HOLE_ANGLES[i] * (Math.PI / 180);
+                const hx = RADIUS + HOLE_DISTANCE * Math.cos(angleRad);
+                const hy = RADIUS + HOLE_DISTANCE * Math.sin(angleRad);
+                
+                path += `M ${hx},${hy} m ${HOLE_RADIUS},0 a ${HOLE_RADIUS},${HOLE_RADIUS} 0 1,1 -${HOLE_RADIUS * 2},0 a ${HOLE_RADIUS},${HOLE_RADIUS} 0 1,1 ${HOLE_RADIUS * 2},0 `;
+            }
+
+            // Central cutout (Behind the massive metal cap)
+            const INNER_RADIUS = RADIUS * 0.5; // Matches the 55% CSS cap size roughly
+            path += `M ${RADIUS},${RADIUS} m ${INNER_RADIUS},0 a ${INNER_RADIUS},${INNER_RADIUS} 0 1,1 -${INNER_RADIUS * 2},0 a ${INNER_RADIUS},${INNER_RADIUS} 0 1,1 ${INNER_RADIUS * 2},0 `;
+
+            svgStr += `<path d="${path}" fill="url(#discGrad)" fill-rule="evenodd" filter="url(#glassBevel)" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>`;
+            svgStr += `</svg>`;
+            return svgStr;
+        }
+
+        let isDragging = false;
+        let activeHole = null;
+        let maxRotation = 0;
+        let currentRotation = 0;
+        let startPointerAngle = 0;
+
+        function getPointerAngle(e) {
+            const rect = dialDisc.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI);
+        }
+
+        function attachDragEvents() {
+            const hitTargets = document.querySelectorAll('.hit-target');
+            hitTargets.forEach(target => {
+                target.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    isDragging = true;
+                    activeHole = parseInt(target.dataset.hole);
+                    
+                    // The distance this specific hole must travel to hit the stopper
+                    maxRotation = STOPPER_ANGLE - HOLE_ANGLES[activeHole];
+                    
+                    startPointerAngle = getPointerAngle(e);
+                    currentRotation = 0;
+                    
+                    dialDisc.style.transition = 'none';
+                });
+            });
+        }
+
+        window.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+
+            let currentAngle = getPointerAngle(e);
+            let delta = currentAngle - startPointerAngle;
+
+            // Handle wrap-around frame-by-frame
+            if (delta > 180) delta -= 360;
+            if (delta < -180) delta += 360;
+
+            // Continuously accumulate the rotation instead of using an absolute start point
+            let newRotation = currentRotation + delta;
+
+            // Constrain between 0 and stopper
+            if (newRotation < 0) newRotation = 0;
+            if (newRotation > maxRotation) newRotation = maxRotation;
+
+            currentRotation = newRotation;
+            dialDisc.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Update start angle for the next frame
+            startPointerAngle = currentAngle;
+        }, { passive: false });
+
+        window.addEventListener('pointerup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            // Dialed successfully if within 5 degrees of the stopper
+            const dialedNumber = (currentRotation >= maxRotation - 5) ? activeHole : null;
+
+            // Spring back animation physics
+            const duration = Math.max(0.4, currentRotation / 250); 
+            
+            dialDisc.style.transition = `transform ${duration}s cubic-bezier(0.2, 1, 0.3, 1)`;
+            currentRotation = 0;
+            dialDisc.style.transform = `rotate(0deg)`;
+
+            if (dialedNumber) {
+                setTimeout(() => {
+                    openModal(dialedNumber);
+                }, duration * 1000 + 100);
+            }
+
+            activeHole = null;
+        });
+
+        const csOverlay = document.getElementById('cs-overlay');
+        const csClose = document.getElementById('cs-close');
+        const csContent = document.getElementById('cs-content');
+        
+        let scrollObserver;
+
+        function openModal(number) {
+            const formattedNumber = String(number).padStart(2, '0');
+            const data = projectData[number] || {
+                html: `
+                    <div class="cs-hero reveal">
+                        <span class="cs-tag">archived / upcoming</span>
+                        <h1>Entry ${formattedNumber}</h1>
+                    </div>
+                    <div class="cs-grid">
+                        <div class="cs-text reveal">
+                            <h3>Classified</h3>
+                            <p>This section of the portfolio is currently being curated. Check back later for more updates and new projects.</p>
+                        </div>
+                    </div>
+                `
+            };
+            
+            // Inject the rich scrollable content
+            csContent.innerHTML = data.html;
+            
+            // Slide up the sheet
+            csOverlay.classList.add('active');
+            
+            // Reset scroll position to top
+            csContent.scrollTop = 0;
+
+            // Initialize Intersection Observer for scroll animations
+            if(scrollObserver) scrollObserver.disconnect();
+            
+            scrollObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.15 }); // Triggers when 15% of the element is visible
+
+            // Attach observer to all elements with .reveal class
+            setTimeout(() => {
+                document.querySelectorAll('.reveal').forEach(el => {
+                    scrollObserver.observe(el);
+                });
+            }, 100); 
+        }
+
+        csClose.addEventListener('click', () => {
+            csOverlay.classList.remove('active');
+        });
+
+        // --- PAGE NAVIGATION LOGIC ---
+        const pageData = {
+            'about': `
+                <p style="margin-bottom: 1.5rem;">I am Devam Vora, a Creative Architect blurring the lines between corporate finance and visual design.</p>
+                <p style="margin-bottom: 1.5rem;">With a background in quantitative modeling and brand architecture, I build experiences that are both logically sound and radically designed. I believe the best products live at the intersection of strict unit economics and unbounded creative direction.</p>
+            `,
+            'resume': `
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--text-accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; text-transform: uppercase;">Education</h4>
+                    <p style="color: var(--text-main);"><strong>B.S. Finance & Computer Science</strong></p>
+                    <p style="font-size: 0.9rem;">University of Mumbai (2020 - 2024)</p>
                 </div>
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--text-accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; text-transform: uppercase;">Experience</h4>
+                    <p style="color: var(--text-main); margin-bottom: 0.2rem;"><strong>Creative Director</strong> — Brawn Coffee (2023 - Present)</p>
+                    <p style="font-size: 0.9rem; margin-bottom: 1rem;">Led specialty beverage brand architecture, designed maximalist pop-up events, and structured distributor unit economics.</p>
+                    
+                    <p style="color: var(--text-main); margin-bottom: 0.2rem;"><strong>Financial Analyst</strong> — XYZ Capital (2022)</p>
+                    <p style="font-size: 0.9rem;">Developed quantitative models covering Delta-Gamma option interactions and comprehensive WACC calculations.</p>
+                </div>
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="color: var(--text-accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 0.5rem; text-transform: uppercase;">Skills</h4>
+                    <p>Financial Modeling, UI/UX Architecture, Shopify, JSON-LD, Live DJ Mixing (Rekordbox), HTML/CSS/JS.</p>
+                </div>
+                <button class="nav-btn" style="width: 100%; text-align: center; padding: 1rem;" onclick="alert('In a real environment, this would link to your PDF!')">Download Full Resume (PDF)</button>
+            `,
+            'contact': `
+                <p style="margin-bottom: 2rem;">Let's build something extraordinary together. Whether it's a financial model, a web architecture project, or a creative pop-up, I'm always open to discussing new ideas.</p>
+                <p style="font-family: 'JetBrains Mono', monospace; margin-bottom: 1rem; color: var(--text-main);">
+                    <svg style="width: 16px; height: 16px; vertical-align: middle; margin-right: 8px; stroke: currentColor; fill: none;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    hello@devamvora.com
+                </p>
+                <p style="font-family: 'JetBrains Mono', monospace; color: var(--text-main);">
+                    <svg style="width: 16px; height: 16px; vertical-align: middle; margin-right: 8px; stroke: currentColor; fill: none;" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                    linkedin.com/in/devamvora
+                </p>
+            `
+        };
 
-                <button class="rotary__hub" id="dialHub" type="button" aria-label="Reset dial">
-                  <span class="rotary__hub-mark">DV</span>
-                </button>
-              </div>
-            </div>
+        const pageOverlay = document.getElementById('page-overlay');
+        const pageClose = document.getElementById('page-close');
+        const pageTitle = document.getElementById('page-title');
+        const pageContent = document.getElementById('page-content');
 
-            <div class="dial-readout" aria-live="polite">
-              <span id="dialState">READY</span>
-              <span class="dial-readout__line"></span>
-              <span id="dialNumber">00</span>
-            </div>
-          </div>
-        </div>
+        function openPage(pageKey, title) {
+            pageTitle.innerText = title;
+            pageContent.innerHTML = pageData[pageKey];
+            pageOverlay.classList.add('active');
+        }
 
-        <div class="phone-shadow" aria-hidden="true"></div>
-      </div>
+        // Event Listeners for Navigation
+        document.getElementById('nav-about').addEventListener('click', () => openPage('about', 'About Me'));
+        document.getElementById('nav-resume').addEventListener('click', () => openPage('resume', 'Resume'));
+        document.getElementById('nav-contact').addEventListener('click', () => openPage('contact', 'Contact'));
+        
+        // 'work' button draws attention to the dial
+        document.getElementById('nav-work').addEventListener('click', () => {
+            pageOverlay.classList.remove('active');
+            csOverlay.classList.remove('active'); // Fix: Changed modalOverlay to csOverlay
+            
+            // Wiggle the dial to show them where the work is
+            dialDisc.style.transition = 'transform 0.3s cubic-bezier(0.2, 1, 0.3, 1)';
+            dialDisc.style.transform = 'rotate(15deg)';
+            setTimeout(() => {
+                dialDisc.style.transform = 'rotate(0deg)';
+                setTimeout(() => { dialDisc.style.transition = 'none'; }, 300);
+            }, 300);
+        });
 
-      <div class="dial-notes">
-        <div class="dial-note">
-          <span>ROTARY LOGIC</span>
-          <p>Pointer velocity is derived from angular movement, not mouse distance.</p>
-        </div>
-        <div class="dial-note">
-          <span>MECHANICAL STOP</span>
-          <p>Reverse motion is ignored during interaction. The dial only travels clockwise.</p>
-        </div>
-        <div class="dial-note">
-          <span>SNAPBACK</span>
-          <p>A cubic-bezier return animation restores the dial after every completed input.</p>
-        </div>
-      </div>
-    </section>
+        pageClose.addEventListener('click', () => {
+            pageOverlay.classList.remove('active');
+        });
 
-    <footer class="footer">
-      <span>DEVAM VORA</span>
-      <span>BUILDING AT THE INTERSECTION OF TASTE &amp; TENSORS</span>
-    </footer>
-  </main>
+        pageOverlay.addEventListener('click', (e) => {
+            if (e.target === pageOverlay) {
+                pageOverlay.classList.remove('active');
+            }
+        });
 
-  <div class="modal-layer" id="modalLayer" aria-hidden="true">
-    <div class="modal-backdrop" data-close-modal></div>
+        // Initialize and handle resizing
+        window.addEventListener('load', initDial);
+        
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (dialWrapper.offsetWidth !== DIAL_SIZE) {
+                    initDial();
+                }
+            }, 250);
+        });
 
-    <article
-      class="project-modal glass-panel"
-      id="projectModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modalTitle"
-      tabindex="-1"
-    >
-      <button class="modal-close" id="modalClose" type="button" aria-label="Close project">
-        <span></span>
-        <span></span>
-      </button>
+        // --- GIANT TEXT PARALLAX ANIMATION ---
+        const giantText = document.querySelector('.giant-text');
+        window.addEventListener('mousemove', (e) => {
+            if(!giantText) return;
+            
+            // Calculate mouse position relative to screen center (-1 to 1)
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+            
+            // Move text in opposite direction of mouse for a 3D depth effect
+            const moveX = x * -60; // Max 60px horizontal drift
+            const moveY = y * -30; // Max 30px vertical drift
+            
+            giantText.style.setProperty('--move-x', `${moveX}px`);
+            giantText.style.setProperty('--move-y', `${moveY}px`);
+        });
 
-      <div class="modal-topline">
-        <span id="modalIndex">01 / 04</span>
-        <span id="modalCategory">PROJECT</span>
-      </div>
-
-      <div class="modal-content">
-        <p class="eyebrow" id="modalKicker">BRAWN COFFEE</p>
-        <h2 id="modalTitle">Brawn Coffee: Maximalist Pop-Up</h2>
-        <p class="modal-description" id="modalDescription"></p>
-
-        <div class="modal-detail-grid">
-          <div>
-            <span>DISCIPLINES</span>
-            <strong id="modalDisciplines"></strong>
-          </div>
-          <div>
-            <span>MODE</span>
-            <strong id="modalMode"></strong>
-          </div>
-          <div>
-            <span>YEAR</span>
-            <strong id="modalYear"></strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <span id="modalHint">CHAPTER LOADED</span>
-        <span class="modal-progress"><i id="modalProgress"></i></span>
-      </div>
-    </article>
-  </div>
-
-  <script src="script.js"></script>
+    </script>
 </body>
 </html>
