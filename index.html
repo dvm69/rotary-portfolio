@@ -7,9 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@100;300;400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #2a0808;
-            --bg-light: #5a1818;
-            --text-accent: #9db2e1; /* Periwinkle blue from reference */
+            --bg-dark: #1a1428;
+            --bg-light: #452b4e;
+            --text-accent: #aebce5; 
             --text-main: #e8e0d5;
             --text-muted: rgba(232, 224, 213, 0.6);
             
@@ -30,7 +30,7 @@
 
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background: radial-gradient(circle at 50% 50%, var(--bg-light), var(--bg-dark));
+            background: #4a1016; /* Deep maroon red */
             color: var(--text-main);
             min-height: 100vh;
             overflow: hidden;
@@ -50,7 +50,41 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
             opacity: 0.04;
             pointer-events: none;
-            z-index: 0;
+            z-index: -1;
+        }
+
+        .cursor-reveal-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            z-index: 0; 
+            pointer-events: none;
+        }
+
+        .cursor-reveal-target {
+            width: 100%;
+            height: 100%;
+            transform: perspective(1200px) rotateX(var(--cursor-tilt-x, 0deg)) rotateY(var(--cursor-tilt-y, 0deg));
+            transform-origin: center center;
+            transition: transform 120ms linear;
+        }
+
+        .cursor-reveal-canvas {
+            mix-blend-mode: normal;
+            opacity: 0.85; /* Slight transparency to blend with the maroon background */
+        }
+
+        @media (pointer: coarse) {
+            .cursor-reveal-canvas { display: none; }
+            .cursor-reveal-target { transform: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .cursor-reveal-canvas { display: none; }
+            .cursor-reveal-target { transform: none; }
         }
 
         /* Top Navigation */
@@ -620,6 +654,10 @@
 </head>
 <body>
 
+    <div id="reveal-container" class="cursor-reveal-container">
+        <div id="reveal-target" class="cursor-reveal-target"></div>
+    </div>
+
     <nav>
         <div class="nav-links">
             <span id="nav-about">about me</span>
@@ -1164,6 +1202,222 @@
             
             giantText.style.setProperty('--move-x', `${moveX}px`);
             giantText.style.setProperty('--move-y', `${moveY}px`);
+        });
+
+        class CursorReveal {
+            constructor({
+                container,
+                target,
+                imageUrl,
+                idleDelay = 900
+            }) {
+                this.container = typeof container === "string" ? document.querySelector(container) : container;
+                this.target = typeof target === "string" ? document.querySelector(target) : target;
+                this.idleDelay = idleDelay;
+
+                if (!this.container || !this.target) return;
+
+                this.samples = window.innerWidth < 768 ? 28 : 72;
+                this.pointer = { x: 0.5, y: 0.5 };
+                this.smoothed = { x: 0.5, y: 0.5 };
+                this.lastSmoothed = { x: 0.5, y: 0.5 };
+                
+                this.pointerSeen = false;
+                this.pace = 0;
+                this.lastMoveTime = performance.now();
+                this.trail = [];
+
+                this.canvas = document.createElement("canvas");
+                this.ctx = this.canvas.getContext("2d");
+                this.canvas.className = "cursor-reveal-canvas";
+
+                Object.assign(this.canvas.style, {
+                    position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none", zIndex: "1"
+                });
+
+                this.container.style.position = getComputedStyle(this.container).position === "static" ? "relative" : getComputedStyle(this.container).position;
+                this.container.appendChild(this.canvas);
+                
+                // Robust Image Loading
+                this.imageLoaded = false;
+                this.image = new Image();
+                this.image.onload = () => { this.imageLoaded = true; };
+                this.image.src = imageUrl;
+
+                this.resize();
+
+                for (let i = 0; i < this.samples; i++) {
+                    this.trail.push({ x: 0.5, y: 0.5 });
+                }
+
+                this.handlePointerMove = this.handlePointerMove.bind(this);
+                this.handleResize = this.handleResize.bind(this);
+                this.animate = this.animate.bind(this);
+
+                window.addEventListener("pointermove", this.handlePointerMove, { passive: true });
+                window.addEventListener("resize", this.handleResize);
+
+                // Run unconditionally (bypasses IntersectionObserver bugs)
+                this.raf = requestAnimationFrame(this.animate);
+            }
+
+            resize() {
+                const rect = this.container.getBoundingClientRect();
+                this.width = rect.width;
+                this.height = rect.height;
+                this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+                this.canvas.width = this.width * this.dpr;
+                this.canvas.height = this.height * this.dpr;
+                this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+            }
+
+            handleResize() { this.resize(); }
+
+            handlePointerMove(event) {
+                const rect = this.container.getBoundingClientRect();
+                const x = (event.clientX - rect.left) / rect.width;
+                const y = (event.clientY - rect.top) / rect.height;
+
+                this.pointer.x = Math.max(0, Math.min(1, x));
+                this.pointer.y = Math.max(0, Math.min(1, y));
+                this.pointerSeen = true;
+                this.lastMoveTime = performance.now();
+            }
+
+            updatePointer(time) {
+                if (!this.pointerSeen) return;
+
+                const idle = time - this.lastMoveTime > this.idleDelay;
+
+                if (idle) {
+                    const driftX = this.noise(this.smoothed.x, this.smoothed.y, time) * 0.0003;
+                    const driftY = this.noise(this.smoothed.y, this.smoothed.x, time) * 0.0003;
+                    this.pointer.x = Math.max(0.05, Math.min(0.95, this.pointer.x + driftX));
+                    this.pointer.y = Math.max(0.05, Math.min(0.95, this.pointer.y + driftY));
+                }
+
+                this.smoothed.x += (this.pointer.x - this.smoothed.x) * 0.17;
+                this.smoothed.y += (this.pointer.y - this.smoothed.y) * 0.17;
+
+                const dx = this.smoothed.x - this.lastSmoothed.x;
+                const dy = this.smoothed.y - this.lastSmoothed.y;
+                const distance = Math.hypot(dx, dy);
+
+                const targetPace = Math.min(1, distance / 0.029);
+                if (targetPace > this.pace) {
+                    this.pace += (targetPace - this.pace) * 0.09;
+                } else {
+                    this.pace += (targetPace - this.pace) * 0.205;
+                }
+
+                this.lastSmoothed.x = this.smoothed.x;
+                this.lastSmoothed.y = this.smoothed.y;
+
+                this.trail.unshift({ x: this.smoothed.x, y: this.smoothed.y });
+                this.trail.length = this.samples;
+            }
+
+            noise(x, y, time) {
+                return (
+                    Math.sin(x * 8.2 + time * 0.0014) * 0.5 +
+                    Math.sin(y * 13.7 - time * 0.0011) * 0.3 +
+                    Math.sin((x + y) * 21.3 + time * 0.0008) * 0.2
+                );
+            }
+
+            drawTrail(time) {
+                const ctx = this.ctx;
+                ctx.clearRect(0, 0, this.width, this.height);
+
+                if (!this.trail.length) return;
+
+                // 1. Draw the thick liquid brush trail FIRST
+                ctx.globalCompositeOperation = 'source-over';
+
+                const idle = performance.now() - this.lastMoveTime > this.idleDelay;
+                let visibility = 1;
+
+                if (idle) {
+                    visibility = Math.max(0, 1 - (performance.now() - this.lastMoveTime - this.idleDelay) / 800);
+                }
+
+                const speedFactor = Math.max(0, Math.min(1, this.pace));
+                // Massive brush radius for liquid metal feel
+                const radius = 120 * (0.5 + speedFactor * 0.9);
+                const taper = 1.2 - speedFactor * (1.2 - 0.8);
+
+                for (let i = 0; i < this.trail.length; i++) {
+                    const point = this.trail[i];
+                    if (!point) continue;
+
+                    const progress = 1 - i / this.trail.length;
+                    const weight = Math.pow(progress, taper);
+                    const wobble = this.noise(point.x, point.y, time) * 10 * weight;
+                    
+                    const x = point.x * this.width + wobble;
+                    const y = point.y * this.height + wobble;
+                    const currentRadius = radius * weight * visibility;
+
+                    if (currentRadius <= 0.1) continue;
+
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, currentRadius);
+                    // Safe RGBA usage prevents hexadecimal parsing errors
+                    gradient.addColorStop(0, `rgba(255, 255, 255, 1)`);
+                    gradient.addColorStop(0.65, `rgba(255, 255, 255, 0.6)`);
+                    gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(x, y, currentRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // 2. ONLY attempt to mask if the image is fully decoded and valid
+                if (this.imageLoaded && this.image.width > 0) {
+                    ctx.globalCompositeOperation = 'source-in';
+                    
+                    const imgRatio = this.image.width / this.image.height;
+                    const canvasRatio = this.width / this.height;
+                    let drawWidth = this.width;
+                    let drawHeight = this.height;
+                    let offsetX = 0;
+                    let offsetY = 0;
+
+                    if (imgRatio > canvasRatio) {
+                        drawWidth = this.height * imgRatio;
+                        offsetX = (this.width - drawWidth) / 2;
+                    } else {
+                        drawHeight = this.width / imgRatio;
+                        offsetY = (this.height - drawHeight) / 2;
+                    }
+                    ctx.drawImage(this.image, offsetX, offsetY, drawWidth, drawHeight);
+                }
+            }
+
+            applyReveal() {
+                const tiltX = (this.smoothed.y - 0.5) * -5;
+                const tiltY = (this.smoothed.x - 0.5) * 5;
+                this.target.style.setProperty("--cursor-tilt-x", `${tiltX}deg`);
+                this.target.style.setProperty("--cursor-tilt-y", `${tiltY}deg`);
+            }
+
+            animate(time) {
+                this.raf = requestAnimationFrame(this.animate);
+                
+                // If CSS hides the canvas (e.g. mobile view), skip rendering to save CPU
+                if (getComputedStyle(this.canvas).display === 'none') return;
+                
+                this.updatePointer(time);
+                this.drawTrail(time);
+                this.applyReveal();
+            }
+        }
+
+        // Initialize the effect using the correct holographic texture.
+        const cursorReveal = new CursorReveal({
+            container: "#reveal-container",
+            target: "#reveal-target",
+            imageUrl: "liquid.png" 
         });
 
     </script>
