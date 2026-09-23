@@ -132,8 +132,9 @@
 
         .dial-wrapper {
             position: relative;
-            width: 480px; /* Larger dial */
-            height: 480px;
+            /* Fluid sizing: 90% of width, 55% of height (to prevent vertical overflow), capped at 480px */
+            width: min(90vw, 55vh, 480px); 
+            aspect-ratio: 1 / 1; /* Automatically maintains a perfect circle */
             perspective: 1000px;
             filter: drop-shadow(0 30px 40px rgba(0,0,0,0.6));
         }
@@ -582,6 +583,30 @@
         .reveal-delay-1 { transition-delay: 0.15s; }
 
         @media (max-width: 768px) {
+            /* Layout Adjustments for Mobile */
+            nav { padding: 1.5rem; flex-direction: column; gap: 1.2rem; }
+            .nav-links { gap: 1.5rem; }
+            
+            /* Typography Scaling */
+            .giant-text { font-size: 25vw; top: 18%; }
+            
+            /* Bottom Corner Anchors */
+            .bottom-left { bottom: 1.5rem; left: 1.5rem; max-width: 50%; }
+            .bottom-right { 
+                bottom: 1.5rem; 
+                right: 1.5rem; 
+                flex-direction: column; 
+                align-items: flex-end; 
+                gap: 0.5rem; 
+            }
+            .bottom-right svg { width: 40px; height: 40px; }
+            
+            /* Regular Modals (About, Resume, Contact) */
+            .modal-content { padding: 2rem 1.5rem; width: 95%; }
+            .modal-close { top: 1rem; right: 1rem; }
+            .modal-title { font-size: 2rem; margin-bottom: 1rem; }
+
+            /* Case Study Full-Page Sheet */
             .cs-overlay { height: 90vh; border-radius: 30px 30px 0 0; }
             .cs-header { padding: 1.5rem; }
             .cs-scroll-area { padding: 5rem 1.5rem 6rem 1.5rem; }
